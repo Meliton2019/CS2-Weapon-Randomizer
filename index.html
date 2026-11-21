@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS2 Weapon Randomizer</title>
+<style>
+:root {
+  --bg:#101216;
+  --panel:#1a1e25;
+  --panel2:#252c36;
+  --orange:#e9a23b;
+  --text:#f1f3f5;
+  --muted:#929ba8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#252b35,var(--bg) 65%);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+}
+header{text-align:center;padding:30px 15px 15px}
+header h1{margin:0;font-size:clamp(27px,5vw,43px);letter-spacing:3px}
+header h1 span{color:var(--orange)}
+header p{color:var(--muted)}
+.container{max-width:1100px;margin:auto;padding:15px}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(280px,390px);
+  gap:20px;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid #303743;
+  border-radius:14px;
+  padding:20px;
+}
+h2{font-size:17px;margin:0 0 18px;color:var(--orange);letter-spacing:1px}
+.result-panel{
+  min-height:300px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:linear-gradient(145deg,#252d38,#171b22);
+  border:1px solid #46515f;
+  border-radius:12px;
+  padding:25px 12px;
+}
+.result-panel small{color:var(--muted);letter-spacing:2px}
+.result{
+  font-size:clamp(30px,5vw,43px);
+  font-weight:bold;
+  color:var(--orange);
+  margin:20px 0 10px;
+  overflow-wrap:anywhere;
+}
+.result-category{color:var(--muted);font-size:14px}
+.spin{
+  font-size:20px;
+  width:min(100%,300px);
+  padding:18px;
+  margin-top:25px;
+}
+button{
+  background:var(--orange);
+  color:#171717;
+  border:0;
+  padding:12px 15px;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.2s;
+}
+button:hover{filter:brightness(1.15);transform:translateY(-1px)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.secondary{
+  background:var(--panel2);
+  color:var(--text);
+  border:1px solid #414b59;
+}
+.filters{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:17px;
+}
+.filters button{font-size:12px;padding:11px 7px}
+.filters .team{border-color:#526b87}
+.filters .category-filter{border-color:#9b7135}
+.filters .specific{border-color:#b48c54}
+.search{
+  width:100%;
+  background:#11151b;
+  color:white;
+  border:1px solid #394351;
+  border-radius:7px;
+  padding:11px;
+  margin-bottom:15px;
+}
+.category{margin:17px 0}
+.category h3{
+  font-size:13px;
+  color:var(--orange);
+  border-bottom:1px solid #343c47;
+  padding-bottom:8px;
+}
+.weapon{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:8px 5px;
+  font-size:14px;
+  border-radius:5px;
+}
+.weapon:hover{background:#252b34}
+.weapon input{accent-color:var(--orange);width:16px;height:16px;cursor:pointer}
+.weapon label{cursor:pointer;flex:1}
+.stats{color:var(--muted);font-size:13px;margin-top:15px}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
+@media(max-width:750px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>CS2 <span>WEAPON</span> RANDOMIZER</h1>
+<p>Una selección. Un arma. A combatir.</p>
+</header>
+
+<div class="container">
+<div class="layout">
+
+<section class="panel">
+<h2>🎯 ARMA ALEATORIA</h2>
+
+<div class="result-panel">
+<small>ARMA SELECCIONADA</small>
+<div class="result" id="result">¿QUÉ TE TOCARÁ?</div>
+<div class="result-category" id="resultCategory">¡Prepárate para combatir!</div>
+
+<button class="spin" id="spinBtn" onclick="chooseWeapon()">
+ELEGIR ARMA
+</button>
+</div>
+
+<div class="stats" id="count"></div>
+<div class="stats" id="lastResult">Última arma: ninguna</div>
+</section>
+
+<section class="panel">
+<h2>⚙️ PERSONALIZAR ARMAS</h2>
+
+<div class="filters">
+<button class="secondary" onclick="setAll(true)">Seleccionar todas</button>
+<button class="secondary" onclick="setAll(false)">Eliminar todas</button>
+
+<button class="secondary team" onclick="filterTeam('CT')">🔵 Solo armas CT</button>
+<button class="secondary team" onclick="filterTeam('T')">🟠 Solo armas T</button>
+
+<button class="secondary category-filter" onclick="filterCategory('RIFLES')">🎯 Solo rifles</button>
+<button class="secondary category-filter" onclick="filterCategory('NIVEL MEDIO')">🔥 Solo nivel medio</button>
+<button class="secondary category-filter" onclick="filterCategory('PISTOLAS')">🔫 Solo pistolas</button>
+
+<button class="secondary specific" onclick="filterTeamCategory('T','RIFLES')">🎯 Solo rifles T</button>
+<button class="secondary specific" onclick="filterTeamCategory('CT','RIFLES')">🎯 Solo rifles CT</button>
+
+<button class="secondary specific" onclick="filterTeamCategory('T','NIVEL MEDIO')">🔥 Solo nivel medio T</button>
+<button class="secondary specific" onclick="filterTeamCategory('CT','NIVEL MEDIO')">🔥 Solo nivel medio CT</button>
+
+<button class="secondary specific" onclick="filterTeamCategory('T','PISTOLAS')">🔫 Solo pistolas T</button>
+<button class="secondary specific" onclick="filterTeamCategory('CT','PISTOLAS')">🔫 Solo pistolas CT</button>
+
+<button class="secondary" onclick="resetAll()">↺ Restablecer</button>
+</div>
+
+<input class="search" id="search" placeholder="Buscar arma..." oninput="renderWeapons()">
+<div id="weaponList"></div>
+</section>
+
+</div>
+</div>
+
+<footer>CS2 WEAPON RANDOMIZER · RANDOM SELECTION</footer>
+
+<script>
+
+const weapons = [
+{name:"Glock-18",category:"PISTOLAS",teams:["T"]},
+{name:"USP-S",category:"PISTOLAS",teams:["CT"]},
+{name:"P2000",category:"PISTOLAS",teams:["CT"]},
+{name:"Dual Berettas",category:"PISTOLAS",teams:["CT","T"]},
+{name:"P250",category:"PISTOLAS",teams:["CT","T"]},
+{name:"Five-SeveN",category:"PISTOLAS",teams:["CT"]},
+{name:"Tec-9",category:"PISTOLAS",teams:["T"]},
+{name:"CZ75-Auto",category:"PISTOLAS",teams:["CT","T"]},
+{name:"Desert Eagle",category:"PISTOLAS",teams:["CT","T"]},
+{name:"R8 Revolver",category:"PISTOLAS",teams:["CT","T"]},
+
+{name:"MAC-10",category:"NIVEL MEDIO",teams:["T"]},
+{name:"MP9",category:"NIVEL MEDIO",teams:["CT"]},
+{name:"MP7",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"MP5-SD",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"UMP-45",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"P90",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"PP-Bizon",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"Nova",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"XM1014",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"MAG-7",category:"NIVEL MEDIO",teams:["CT"]},
+{name:"Sawed-Off",category:"NIVEL MEDIO",teams:["T"]},
+{name:"Negev",category:"NIVEL MEDIO",teams:["CT","T"]},
+{name:"M249",category:"NIVEL MEDIO",teams:["CT","T"]},
+
+{name:"FAMAS",category:"RIFLES",teams:["CT"]},
+{name:"Galil AR",category:"RIFLES",teams:["T"]},
+{name:"AK-47",category:"RIFLES",teams:["T"]},
+{name:"M4A4",category:"RIFLES",teams:["CT"]},
+{name:"M4A1-S",category:"RIFLES",teams:["CT"]},
+{name:"AUG",category:"RIFLES",teams:["CT"]},
+{name:"SG 553",category:"RIFLES",teams:["T"]},
+{name:"SSG 08",category:"RIFLES",teams:["CT","T"]},
+{name:"AWP",category:"RIFLES",teams:["CT","T"]},
+{name:"SCAR-20",category:"RIFLES",teams:["CT"]},
+{name:"G3SG1",category:"RIFLES",teams:["T"]},
+
+{name:"Zeus x27",category:"ESPECIAL",teams:["CT","T"]}
+].map(w=>({...w,enabled:true}));
+
+const categoryOrder=["PISTOLAS","NIVEL MEDIO","RIFLES","ESPECIAL"];
+let lastWeapon=null;
+
+function getActive(){
+return weapons.filter(w=>w.enabled);
+}
+
+// Seleccionar o desactivar todas
+function setAll(value){
+weapons.forEach(w=>w.enabled=value);
+update();
+}
+
+// Seleccionar todas las armas de un equipo
+function filterTeam(team){
+weapons.forEach(w=>w.enabled=w.teams.includes(team));
+update();
+}
+
+// Seleccionar todas las armas de una categoría
+function filterCategory(category){
+weapons.forEach(w=>w.enabled=w.category===category);
+update();
+}
+
+// Seleccionar una categoría de un equipo concreto
+function filterTeamCategory(team,category){
+weapons.forEach(w=>{
+w.enabled=w.teams.includes(team)&&w.category===category;
+});
+update();
+}
+
+// Restablecer
+function resetAll(){
+weapons.forEach(w=>w.enabled=true);
+lastWeapon=null;
+
+document.getElementById("result").textContent="¿QUÉ TE TOCARÁ?";
+document.getElementById("resultCategory").textContent="¡Prepárate para combatir!";
+document.getElementById("lastResult").textContent="Última arma: ninguna";
+
+update();
+}
+
+// Lista de armas
+function renderWeapons(){
+const container=document.getElementById("weaponList");
+const search=document.getElementById("search").value.toLowerCase();
+container.innerHTML="";
+
+categoryOrder.forEach(category=>{
+const group=weapons.filter(w=>
+w.category===category&&w.name.toLowerCase().includes(search)
+);
+if(!group.length)return;
+
+const section=document.createElement("div");
+section.className="category";
+
+const title=document.createElement("h3");
+title.textContent=category+" · "+group.filter(w=>w.enabled).length+"/"+group.length;
+section.appendChild(title);
+
+group.forEach(w=>{
+const row=document.createElement("div");
+row.className="weapon";
+
+const checkbox=document.createElement("input");
+checkbox.type="checkbox";
+checkbox.checked=w.enabled;
+
+const label=document.createElement("label");
+label.textContent=w.name;
+
+checkbox.addEventListener("change",()=>{
+w.enabled=checkbox.checked;
+update();
+});
+
+row.append(checkbox,label);
+section.appendChild(row);
+});
+
+container.appendChild(section);
+});
+}
+
+// Elegir arma aleatoria
+function chooseWeapon(){
+const active=getActive();
+
+if(active.length===0){
+document.getElementById("result").textContent="SIN ARMAS";
+document.getElementById("resultCategory").textContent="Activa alguna arma para continuar.";
+return;
+}
+
+// Evitar repetir la última arma
+let candidates=active.filter(w=>w.name!==lastWeapon);
+
+if(candidates.length===0)candidates=active;
+
+const chosen=candidates[Math.floor(Math.random()*candidates.length)];
+
+lastWeapon=chosen.name;
+
+document.getElementById("result").textContent=chosen.name;
+document.getElementById("resultCategory").textContent=chosen.category;
+document.getElementById("lastResult").textContent="Última arma: "+chosen.name;
+}
+
+// Actualizar interfaz
+function update(){
+const active=getActive();
+
+document.getElementById("count").textContent=
+active.length+" / "+weapons.length+" armas activadas";
+
+document.getElementById("spinBtn").disabled=active.length===0;
+
+renderWeapons();
+}
+
+update();
+
+</script>
+</body>
+</html>
